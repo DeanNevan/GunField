@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://Assets/Team/WhiteWing/TeamWhiteWing.gd" type="Script" id=1]
+
+[node name="TeamWhiteWing" type="Node"]
+script = ExtResource( 1 )
