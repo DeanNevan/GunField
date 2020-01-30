@@ -10,7 +10,7 @@ func _ready():
 	capacity = 7#弹容量
 	ammo = capacity#弹药数量
 	fire_rate = 0.9#射速
-	fire_range = 130#射程
+	fire_range = 110#射程
 	penetrating_power = 60#穿透力
 	damage = 5#伤害
 	bullet_speed = 400#子弹速度
