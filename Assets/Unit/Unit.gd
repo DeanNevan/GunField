@@ -46,7 +46,7 @@ func _ready():
 	
 	add_child(tween1)
 	add_child(tween2)
-	add_child(tween3)
+	#add_child(tween3)
 	pass
 
 
@@ -186,16 +186,26 @@ func update_collision_bit():
 func update_scale(is_init = false):
 	size_para = sqrt(clamp(size / 100, 0.5, 100))
 	update_speed()
+	#yield(tween1, "tree_entered")
+	if weapon != null:
+		weapon.scale = Vector2(size_para, size_para)
+		weapon.update_weapon_para()
+	
+	if !tween1.is_inside_tree() or !tween2.is_inside_tree():
+		$Sprite.scale = Vector2(size_para, size_para)
+		$CollisionShape2D.shape.radius = 15 * size_para
+		get_parent().update_main_unit()
+		return
+	
 	if !is_init:
 		tween1.interpolate_property($Sprite, "scale", $Sprite.scale, Vector2(size_para, size_para), 0.3, Tween.TRANS_LINEAR, Tween.EASE_IN)
 	else:
 		tween1.interpolate_property($Sprite, "scale", Vector2(), Vector2(size_para, size_para), 0.3, Tween.TRANS_LINEAR, Tween.EASE_IN)
 	#$Sprite.scale = Vector2(size_para, size_para)
-	if weapon != null:
-		weapon.scale = Vector2(size_para, size_para)
-		weapon.update_weapon_para()
+	
 	tween2.interpolate_property($CollisionShape2D, "shape:radius", $CollisionShape2D.shape.radius, 15 * size_para, 0.3, Tween.TRANS_LINEAR, Tween.EASE_IN)
 	#$CollisionShape2D.shape.radius = 15 * size_para
+	get_parent().update_main_unit()
 	tween1.start()
 	tween2.start()
-	get_parent().update_main_unit()
+	

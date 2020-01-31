@@ -1,7 +1,8 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=5 format=2]
 
 [ext_resource path="res://Assets/Unit/Unit.gd" type="Script" id=1]
 [ext_resource path="res://Assets/Art/Circle.png" type="Texture" id=2]
+[ext_resource path="res://Assets/Unit/AI.gd" type="Script" id=3]
 
 [sub_resource type="CircleShape2D" id=1]
 radius = 15.0
@@ -15,3 +16,36 @@ texture = ExtResource( 2 )
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 scale = Vector2( 1.00224, 1.01033 )
 shape = SubResource( 1 )
+
+[node name="AI" type="Node" parent="."]
+script = ExtResource( 3 )
+
+[node name="Vagrant" type="Node" parent="AI"]
+
+[node name="Soldier" type="Node" parent="AI"]
+
+[node name="Despot" type="Node" parent="AI"]
+
+[node name="Guard" type="Node" parent="AI"]
+
+[node name="Hunter" type="Node" parent="AI"]
+
+[node name="Coward" type="Node" parent="AI"]
+
+[node name="Goddess" type="Node" parent="AI"]
+
+[node name="Knight" type="Node" parent="AI"]
+
+[node name="Butcher" type="Node" parent="AI"]
+
+[node name="Thief" type="Node" parent="AI"]
+
+[node name="Ruler" type="Node" parent="AI"]
+
+[node name="General" type="Node" parent="AI"]
+
+[node name="Doctor" type="Node" parent="AI"]
+
+[node name="Wizard" type="Node" parent="AI"]
+
+[node name="Fool" type="Node" parent="AI"]
