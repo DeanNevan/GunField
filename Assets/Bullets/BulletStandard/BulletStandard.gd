@@ -71,7 +71,7 @@ func judge_damage():
 		if $RayCast2D.get_collider().has_method("get_damage"):
 			if $RayCast2D.get_collider().team != team:
 				if !c.has($RayCast2D.get_collider()):
-					$RayCast2D.get_collider().get_damage(damage, ($RayCast2D.get_collider().global_position - $RayCast2D.get_collision_point()).normalized() * impact_force)
+					$RayCast2D.get_collider().get_damage(damage, ($RayCast2D.get_collider().global_position - $RayCast2D.get_collision_point()).normalized() * impact_force, unit)
 				var ran = rand_range(penetrating_power * 0.4, penetrating_power)
 				if ran > $RayCast2D.get_collider().size:
 					#print("yes")

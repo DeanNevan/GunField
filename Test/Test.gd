@@ -4,13 +4,18 @@ extends Node2D
 # var a = 2
 # var b = "text"
 
-# Called when the node enters the scene tree for the first time.
+onready var test = Node.new()
+onready var a = [test]
 func _ready():
-	var a = [4,2,1]
-	a.resize(2)
-	print(a)
+	add_child(test)
+	pass
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
-	#$Camera2D.position = $RigidBody2D.position
-	pass
+	print("--------------")
+	if Input.is_action_just_pressed("key_a"):
+		print("pressed a")
+		test.queue_free()
+	print(test)
+	print(is_instance_valid(test))
+	print("--------------")

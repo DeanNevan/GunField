@@ -1,15 +1,15 @@
-extends "res://Assets/Scripts/TeamTemplate.gd"
+extends "res://Assets/Unit/AI.gd"
+
 
 # Declare member variables here. Examples:
 # var a = 2
 # var b = "text"
 
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	team_weapon = preload("res://Assets/Guns/Arc-001/Arc-001.tscn")
-	team_color = Color.red
-	unit = preload("res://Assets/Team/RedKill/UnitRedKill.tscn")
-	team_number = 1
+	pass # Replace with function body.
+
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 #func _process(delta):

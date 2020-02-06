@@ -12,7 +12,7 @@ func _ready():
 	fire_rate = 0.9#射速
 	fire_range = 110#射程
 	penetrating_power = 60#穿透力
-	damage = 5#伤害
+	damage = 6#伤害
 	bullet_speed = 400#子弹速度
 	shoot_force = 4.2
 	impact_force = 6

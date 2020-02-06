@@ -1,5 +1,16 @@
 extends RigidBody2D
 
+signal get_damage
+signal release_a_little_ball
+signal eat_a_little_ball
+signal divide
+signal die
+signal shoot
+
+var basic_conversion_rate = 0.5
+var init_size = 100
+var init_speed = 200
+
 var size = 100
 var size_para = sqrt(clamp(size / 100, 0.5, 100))
 var max_stamina = 100
@@ -26,8 +37,20 @@ onready var EmojiTimer = Timer.new()
 onready var tween1 = Tween.new()
 onready var tween2 = Tween.new()
 onready var tween3 = Tween.new()
+
+func _draw():
+	#for i in $AI.little_balls_in_MonitorArea:
+		#draw_circle(i.global_position - global_position, 2, Color.black)
+	#for i in $AI.enemies_in_MonitorArea:
+		#draw_circle(i.global_position - global_position, 15, Color.blue)
+	pass
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	
+	size = init_size
+	speed = init_speed
+	
 	emoji_state = 0
 	$Sprite.add_child(Emoji)
 	add_child(EmojiTimer)
@@ -47,10 +70,15 @@ func _ready():
 	add_child(tween1)
 	add_child(tween2)
 	#add_child(tween3)
+	
+	_init_AI()
 	pass
 
-
 func _process(delta):
+	if is_player_unit:
+		#print($AI.little_balls_in_MonitorArea)
+		pass
+	#	print(weapon.impact_force)
 	max_stamina = size
 	#mass = size / 100
 	if size <= 0:
@@ -58,6 +86,10 @@ func _process(delta):
 	
 	if is_player_unit:
 		_player_control(delta)
+
+func _init_AI():
+	yield(get_tree(), "idle_frame")
+	$AI.init_start_AI()
 
 func _player_control(delta):
 	velocity = Vector2()
@@ -89,6 +121,7 @@ func _player_control(delta):
 	if weapon != null:
 		if Input.is_action_pressed("left_mouse_button"):
 			weapon.shoot(Vector2(cos(weapon.global_rotation), sin(weapon.global_rotation)))
+			emit_signal("shoot")
 		#print("hhh")
 		rotate_weapon(weapon, 0.4 * pow(0.44, size_para) * weapon.rotate_speed * weapon.rotate_speed_times, get_global_mouse_position() - (global_position + weapon.gun_offset.rotated(weapon.global_rotation)), delta)
 
@@ -110,14 +143,15 @@ func divide(target):
 	#new_unit.update_scale(true)
 	update_scale()
 	get_parent().update_main_unit()
-	
+	emit_signal("divide")
 
 func die():
 	$CollisionShape2D.disabled = true
+	emit_signal("die")
 	queue_free()
 
 func update_speed():
-	speed = get_parent().init_speed * pow(0.8, size_para)
+	speed = init_speed * pow(0.8, size_para)
 
 func update_emoji(state = 0, time = 1):
 	if state != emoji_state:
@@ -144,15 +178,16 @@ func rotate_weapon(object, speed, target_direction, delta):
 	var present_direction = Vector2(1, 0).rotated(object.global_rotation)
 	object.global_rotation = present_direction.linear_interpolate(target_direction, speed * delta).angle()
 
-func get_damage(damage, force = Vector2()):
+func get_damage(damage, force = Vector2(), attacker = null):
 	#print(damage)
+	var just_size = size
 	size -= damage
 	update_scale()
-	
 	size_para = sqrt(clamp(size / 100, 1, 100))
 	update_emoji(2, 0.5)
 	linear_velocity += force * 2
 	release_a_little_ball(damage, global_position - force.normalized() * 16 * size_para)
+	emit_signal("get_damage", damage, attacker, just_size)
 
 func release_a_little_ball(little_ball_size, pos):
 	var new_little_ball = little_ball.instance()
@@ -161,12 +196,14 @@ func release_a_little_ball(little_ball_size, pos):
 	new_little_ball.global_position = pos
 	main.add_child(new_little_ball)
 	new_little_ball.get_node("Sprite").modulate = get_parent().team_color
+	emit_signal("release_a_little_ball", new_little_ball)
 	pass
 
 func eat_a_little_ball(little_ball_size = 10):
-	size += little_ball_size * get_parent().basic_conversion_rate
+	size += little_ball_size * basic_conversion_rate
 	update_emoji(1, 0.3)
 	update_scale()
+	emit_signal("eat_a_little_ball", little_ball_size)
 
 func _on_EmojiTimer_timeout():
 	emoji_state = 0

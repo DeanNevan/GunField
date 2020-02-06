@@ -4,9 +4,7 @@ extends "res://Assets/Scripts/TeamTemplate.gd"
 func _ready():
 	team_weapon = preload("res://Assets/Guns/Ju-001/Ju-001.tscn")
 	team_color = Color.white
-	basic_conversion_rate = 0.5
-	init_size = 60
-	init_speed = 180
+	
 	unit = preload("res://Assets/Team/WhiteWing/UnitWhiteWing.tscn")
 	team_number = 0
 
