@@ -13,12 +13,29 @@ onready var ai = get_parent()
 var has_updated_property = false
 
 var is_debug = false
+
+var temp_teammate = []
+var test_para = 0
+
+onready var DamageMonitorTimer = Timer.new()
+var can_monitor_damage = true
+onready var TeammateDamageMonitorTimer = Timer.new()
+var can_monitor_teammate_damage = true
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	add_child(MonitorTimer)
 	MonitorTimer.one_shot = false
 	MonitorTimer.connect("timeout", self, "_on_MonitorTimer_timeout")
 	unit.connect("get_damage", self, "_on_get_damage")
+	
+	add_child(DamageMonitorTimer)
+	add_child(TeammateDamageMonitorTimer)
+	DamageMonitorTimer.one_shot = false
+	TeammateDamageMonitorTimer.one_shot = false
+	DamageMonitorTimer.connect("timeout", self, "_on_DamageMonitorTimer_timeout")
+	TeammateDamageMonitorTimer.connect("timeout", self, "_on_TeammateDamageMonitorTimer_timeout")
+	DamageMonitorTimer.start(monitor_time)
+	TeammateDamageMonitorTimer.start(monitor_time)
 	
 	init_start_monitor()
 	pass
@@ -32,7 +49,7 @@ func update_property():
 	has_updated_property = true
 	
 	if unit.is_player_unit:
-		#is_debug = true
+		is_debug = true
 		pass
 	
 	#弹容量减少10%
@@ -76,6 +93,12 @@ func _on_MonitorTimer_timeout():
 	#if unit.is_player_unit: print(ai.little_balls_in_MonitorArea)
 	monitor()
 
+func _on_DamageMonitorTimer_timeout():
+	can_monitor_damage = true
+
+func _on_TeammateDamageMonitorTimer_timeout():
+	can_monitor_teammate_damage = true
+
 func monitor():
 	_wander()
 	_collector()
@@ -93,6 +116,28 @@ func _wander():
 	
 	if is_debug: print("流浪，守护优先级降低0.5")
 	ai.AI_priorities[ai.AI_action.guard] -= 0.5
+	
+	for teammate in ai.teammates_in_MonitorArea:
+		if !temp_teammate.has(teammate):
+			temp_teammate.append(teammate)
+		if is_instance_valid(teammate):
+			if !teammate.is_connected("get_damage", self, "_on_teammate_get_damage"):
+				teammate.connect("get_damage", self, "_on_teammate_get_damage", [teammate])
+			temp_teammate.erase(teammate)
+	for teammate in temp_teammate:
+		if !ai.teammates_in_MonitorArea.has(teammate):
+			if is_instance_valid(teammate):
+				if teammate.is_connected("get_damage", self, "_on_teammate_get_damage"):
+					teammate.disconnect("get_damage", self, "_on_teammate_get_damage")
+			temp_teammate.erase(teammate)
+			
+	
+	
+	###########################
+	#if ai.enemies_in_MonitorArea.size() > 0:
+		#if is_debug: print(ai.enemies_in_MonitorArea[0].get_node("AI/Vagrant").test_para)
+	###########################
+	
 	
 	if is_debug: print("---特性：流浪，监测结束---")
 
@@ -205,7 +250,30 @@ func _timid():
 	if is_debug: print("---特性：胆小，监测结束---")
 	pass
 
+func _on_teammate_get_damage(damage, attacker, just_size, teammate):
+	if !can_monitor_teammate_damage:
+		return false
+	can_monitor_teammate_damage = false
+	
+	if is_debug: print("---AI：Vagrant，队友受到伤害，判定开始---")
+	#if damage > just_size / 5:
+		#if is_debug: print("伤害大于自身体积20%，躲避优先级提高0.5")
+		#ai.AI_priorities[ai.AI_action.dodge] += 0.5
+	if attacker.size > unit.size:
+		if is_debug: print("攻击者体积大于自身，躲避优先级提高0.5")
+		ai.AI_priorities[ai.AI_action.dodge] += 0.5
+	if damage <= just_size / 5 and attacker.size <= unit.size:
+		if is_debug: print("伤害小于自身体积20%且攻击者体积小于自身，守护优先级提高1")
+		ai.AI_priorities[ai.AI_action.guard] += 1
+		ai.update_action_target(ai.guard_priorities, teammate, 1)
+	if is_debug: print("---AI：Vagrant，队友受到伤害，判定结束---")
+	pass
+
 func _on_get_damage(damage, attacker, just_size):
+	if !can_monitor_damage:
+		return false
+	can_monitor_damage = false
+	
 	if is_debug: print("---AI：Vagrant，受到伤害，判定开始---")
 	if damage > just_size / 5:
 		if is_debug: print("伤害大于自身体积20%，躲避优先级提高0.5")

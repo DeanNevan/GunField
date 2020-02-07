@@ -107,6 +107,7 @@ func shoot(direction):
 	
 	ammo -= 1
 	#print("ammo left", ammo)
+	var _ran = 0
 	for i in extra_bullets + 1:
 		var new_bullet = bullet.instance()
 		new_bullet.team = unit.team
@@ -124,7 +125,8 @@ func shoot(direction):
 			2:
 				new_bullet.add_to_group("team_2_bullets")
 		new_bullet.fly()
-		global_rotation += ran
+		_ran + ran
+	global_rotation += _ran / (extra_bullets + 1)
 	unit.update_emoji(1, 0.15)
 	can_shoot = false
 	is_cooldown = true

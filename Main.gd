@@ -55,7 +55,7 @@ func add_little_ball(count = 100):
 		var new_little_ball = little_ball.instance()
 		new_little_ball.modulate = color_array[randi() % color_array.size()]
 		new_little_ball.global_position = Vector2(rand_range(0, map_size.x), rand_range(0, map_size.y))
-		new_little_ball.size = 10
+		new_little_ball.size = 5
 		new_little_ball.get_node("Sprite").visible = false
 		add_child(new_little_ball)
 		new_little_ball.add_to_group("LB")
