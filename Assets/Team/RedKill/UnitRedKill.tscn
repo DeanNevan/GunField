@@ -3,7 +3,7 @@
 [ext_resource path="res://Assets/Team/RedKill/UnitRedKill.gd" type="Script" id=1]
 [ext_resource path="res://Assets/Art/Circle.png" type="Texture" id=2]
 [ext_resource path="res://Assets/Team/RedKill/AIRedKill.gd" type="Script" id=3]
-[ext_resource path="res://Assets/Unit/AI/Vagrant.tscn" type="PackedScene" id=4]
+[ext_resource path="res://Assets/Unit/AI/Soldier.tscn" type="PackedScene" id=4]
 
 [sub_resource type="CircleShape2D" id=1]
 resource_local_to_scene = true
@@ -19,9 +19,10 @@ self_modulate = Color( 1, 0, 0, 1 )
 texture = ExtResource( 2 )
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+z_index = 2
 shape = SubResource( 1 )
 
 [node name="AI" type="Node" parent="."]
 script = ExtResource( 3 )
 
-[node name="Vagrant" parent="AI" instance=ExtResource( 4 )]
+[node name="Soldier" parent="AI" instance=ExtResource( 4 )]

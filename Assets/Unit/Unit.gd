@@ -27,6 +27,9 @@ var team = 0#0 is player`s team
 var weapon
 var main
 
+var on_mouse = false
+var is_selected = false
+
 var little_ball = preload("res://Assets/LittleBall/LittleBall.tscn")
 
 var is_player_unit = false
@@ -47,6 +50,9 @@ func _draw():
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	input_pickable = true
+	connect("mouse_entered", self, "_on_mouse_entered")
+	connect("mouse_exited", self, "_on_mouse_exited")
 	
 	size = init_size
 	speed = init_speed
@@ -79,6 +85,14 @@ func _process(delta):
 		#print($AI.little_balls_in_MonitorArea)
 		pass
 	#	print(weapon.impact_force)
+	if on_mouse:
+		main.on_mouse_unit = self
+		if Input.is_action_just_pressed("right_mouse_button"):
+			is_selected = true
+			main.selected_unit = self
+			print("!!!!!!!!")
+	else:
+		is_selected = false
 	max_stamina = size
 	#mass = size / 100
 	if size <= 0:
@@ -208,6 +222,12 @@ func eat_a_little_ball(little_ball_size = 10):
 func _on_EmojiTimer_timeout():
 	emoji_state = 0
 	Emoji.texture = load("res://Assets/Art/emoji/pingdan.png")
+
+func _on_mouse_entered():
+	on_mouse = true
+
+func _on_mouse_exited():
+	on_mouse = false
 
 func update_collision_bit():
 	for i in 19:

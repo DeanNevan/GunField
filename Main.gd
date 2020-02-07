@@ -3,6 +3,9 @@ extends Node2D
 var player_unit
 var player_team
 
+var selected_unit
+var on_mouse_unit
+
 var team_count = 2
 
 var color_array = [Color.black, Color.blue, Color.red, Color.green, Color.white, Color.yellow, Color.gray, Color.purple, Color.orange, Color.pink, Color.blueviolet]
@@ -11,6 +14,7 @@ var little_ball = preload("res://Assets/LittleBall/LittleBall.tscn")
 
 var map_size = Vector2(3000, 3000)
 
+onready var DebugLabel = $CanvasLayer/Debug
 onready var TweenCameraZoom = Tween.new()
 onready var add_LittleBall_timer = Timer.new()
 onready var LB_monitor_timer = Timer.new()
@@ -37,6 +41,16 @@ func _ready():
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _physics_process(delta):
+	if selected_unit != null:
+		DebugLabel.text = ("该单位信息" + "\n"
+						+ "体积：" + str(selected_unit.size) + "\n"
+						+ "速度：" + str(selected_unit.speed) + "\n"
+						+ "【漫游】优先级：" + str(selected_unit.get_node("AI").AI_priorities[selected_unit.get_node("AI").AI_action.wander]) + "\n"
+						+ "【收集】优先级：" + str(selected_unit.get_node("AI").AI_priorities[selected_unit.get_node("AI").AI_action.collect]) + "\n"
+						+ "【守护】优先级：" + str(selected_unit.get_node("AI").AI_priorities[selected_unit.get_node("AI").AI_action.guard]) + "\n"
+						+ "【攻击】优先级：" + str(selected_unit.get_node("AI").AI_priorities[selected_unit.get_node("AI").AI_action.attack]) + "\n"
+						+ "【躲避】优先级：" + str(selected_unit.get_node("AI").AI_priorities[selected_unit.get_node("AI").AI_action.dodge]) + "\n") 
+	
 	if player_unit != null:
 		$Camera2D.position = player_unit.position
 		update_camera_zoom(0.3 * player_unit.size_para)

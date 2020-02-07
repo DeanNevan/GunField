@@ -3,7 +3,7 @@ extends Node
 enum AI_action{
 	wander#漫游
 	collect#收集
-	guard#警戒
+	guard#守护
 	attack#攻击
 	dodge#躲避
 }
@@ -90,6 +90,7 @@ func update_MonitorAreaShape():
 		MonitorAreaShape.shape.radius = 15 * get_parent().get_node("Sprite").scale.x + monitor_sensitivity * get_parent().weapon.fire_range
 
 func ActionUpdater():
+	#teammates_in_MonitorArea.erase(self)
 	_clamp_AI_priority()
 	AI_priorities_array = list_sort_to_array(AI_priorities)
 	AI_state = AI_priorities[0]
@@ -126,6 +127,8 @@ func list_sort_to_array(list : Dictionary, list_size := 0):
 
 func update_collect_priorities(list_size = 3):
 	for i in collect_priorities:
+		if !little_balls_in_MonitorArea.has(i):
+			collect_priorities[i] -= 1
 		if collect_priorities.get(i) <= 0 or !is_instance_valid(i):
 			collect_priorities.erase(i)
 		else:
@@ -134,6 +137,8 @@ func update_collect_priorities(list_size = 3):
 
 func update_attack_priorities(list_size = 3):
 	for i in attack_priorities:
+		if !enemies_in_MonitorArea.has(i):
+			attack_priorities[i] -= 1
 		if attack_priorities.get(i) <= 0 or !is_instance_valid(i):
 			attack_priorities.erase(i)
 		else:
@@ -142,6 +147,8 @@ func update_attack_priorities(list_size = 3):
 
 func update_guard_priorities(list_size = 3):
 	for i in guard_priorities:
+		if !teammates_in_MonitorArea.has(i):
+			guard_priorities[i] -= 1
 		if guard_priorities.get(i) <= 0 or !is_instance_valid(i):
 			guard_priorities.erase(i)
 		else:
@@ -150,6 +157,8 @@ func update_guard_priorities(list_size = 3):
 
 func update_dodge_priorities(list_size = 3):
 	for i in dodge_priorities:
+		if !enemies_in_MonitorArea.has(i):
+			dodge_priorities[i] -= 1
 		if dodge_priorities.get(i) <= 0 or !is_instance_valid(i):
 			dodge_priorities.erase(i)
 		else:
@@ -164,6 +173,7 @@ func update_action_target(action_list, target, para):
 
 func _on_ActionUpdaterTimer_timeout():
 	update_MonitorAreaShape()
+	
 	ActionUpdater()
 	ActionUpdaterTimer.start(action_updater_time)
 
@@ -173,6 +183,7 @@ func _on_MonitorArea_body_entered(body):
 			teammates_in_MonitorArea.append(body)
 		else:
 			enemies_in_MonitorArea.append(body)
+	teammates_in_MonitorArea.erase(self)
 	pass # Replace with function body.
 
 func _on_MonitorArea_area_entered(area):
@@ -189,6 +200,7 @@ func _on_MonitorArea_body_exited(body):
 			teammates_in_MonitorArea.erase(body)
 		else:
 			enemies_in_MonitorArea.erase(body)
+	teammates_in_MonitorArea.erase(self)
 	pass # Replace with function body.
 
 func _on_MonitorArea_area_exited(area):

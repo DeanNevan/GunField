@@ -49,7 +49,7 @@ func update_property():
 	has_updated_property = true
 	
 	if unit.is_player_unit:
-		is_debug = true
+		#is_debug = true
 		pass
 	
 	#弹容量减少10%
@@ -89,6 +89,8 @@ func init_start_monitor(time = monitor_time):
 	MonitorTimer.start(monitor_time)
 
 func _on_MonitorTimer_timeout():
+	if ai.teammates_in_MonitorArea.has(unit):
+		ai.teammates_in_MonitorArea.erase(unit)
 	#print(ai.enemies_in_MonitorArea)
 	#if unit.is_player_unit: print(ai.little_balls_in_MonitorArea)
 	monitor()
@@ -100,23 +102,6 @@ func _on_TeammateDamageMonitorTimer_timeout():
 	can_monitor_teammate_damage = true
 
 func monitor():
-	_wander()
-	_collector()
-	_timid()
-	_hateful_tragedy()
-	pass
-
-#特性：流浪。
-func _wander():
-	if is_debug: print("---特性：流浪，监测开始---")
-	
-	if ai.enemies_in_MonitorArea.size() == 0:
-		if is_debug: print("警戒范围内无敌方单位，漫游优先级提高1")
-		ai.AI_priorities[ai.AI_action.wander] += 1
-	
-	if is_debug: print("流浪，守护优先级降低0.5")
-	ai.AI_priorities[ai.AI_action.guard] -= 0.5
-	
 	for teammate in ai.teammates_in_MonitorArea:
 		if !temp_teammate.has(teammate):
 			temp_teammate.append(teammate)
@@ -130,14 +115,23 @@ func _wander():
 				if teammate.is_connected("get_damage", self, "_on_teammate_get_damage"):
 					teammate.disconnect("get_damage", self, "_on_teammate_get_damage")
 			temp_teammate.erase(teammate)
-			
 	
+	_wander()
+	_collector()
+	_timid()
+	_hateful_tragedy()
+	pass
+
+#特性：流浪。
+func _wander():
+	if is_debug: print("---特性：流浪，监测开始---")
 	
-	###########################
-	#if ai.enemies_in_MonitorArea.size() > 0:
-		#if is_debug: print(ai.enemies_in_MonitorArea[0].get_node("AI/Vagrant").test_para)
-	###########################
+	if ai.enemies_in_MonitorArea.size() == 0:
+		if is_debug: print("警戒范围内无敌方单位，漫游优先级提高1")
+		ai.AI_priorities[ai.AI_action.wander] += 0.5
 	
+	if is_debug: print("流浪，守护优先级降低0.5")
+	ai.AI_priorities[ai.AI_action.guard] -= 0.5
 	
 	if is_debug: print("---特性：流浪，监测结束---")
 
@@ -169,12 +163,12 @@ func _collector():
 	
 	_target.invert()
 	for i in _target.size():
-		ai.update_action_target(ai.collect_priorities, _target[i], i + 1)
+		ai.update_action_target(ai.collect_priorities, _target[i], (i + 1) / 2)
 	
-	for i in ai.collect_priorities:
+	#for i in ai.collect_priorities:
 		#如果小球在警戒范围外，该目标的【攻击】优先级-1
-		if !ai.enemies_in_MonitorArea.has(i):
-			ai.update_action_target(ai.attack_priorities, i, -1)
+		#if !ai.enemies_in_MonitorArea.has(i):
+			#ai.update_action_target(ai.attack_priorities, i, -1)
 	if is_debug: print("---特性：收集者，监测结束---")
 	#print(_count)
 	pass
@@ -196,15 +190,15 @@ func _hateful_tragedy():
 			if is_debug: print("存在小于自身一半体积的敌方单位，攻击优先级提高1")
 			ai.AI_priorities[ai.AI_action.attack] += 1
 		for i in _target.size():
-			ai.update_action_target(ai.attack_priorities, _target[i], i + 1)
+			ai.update_action_target(ai.attack_priorities, _target[i], (i + 1) / 2)
 	else:
 		if is_debug: print("不存在小于自身三分之二体积的敌方单位，攻击优先级降低1")
 		ai.AI_priorities[ai.AI_action.attack] -= 1
 	
-	for i in ai.attack_priorities:
+	#for i in ai.attack_priorities:
 		#如果敌人在警戒范围外，该目标的【攻击】优先级-1
-		if !ai.enemies_in_MonitorArea.has(i):
-			ai.update_action_target(ai.attack_priorities, i, -1)
+		#if !ai.enemies_in_MonitorArea.has(i):
+			#ai.update_action_target(ai.attack_priorities, i, -1)
 	
 	if is_debug: print("---特性：可恨的悲剧者，监测结束---")
 	
@@ -234,7 +228,7 @@ func _timid():
 		ai.AI_priorities[ai.AI_action.wander] -= 1
 		for i in _target.size():
 			#以警戒范围内大于自身体积的敌人的大小排序成【躲避】对象的优先级
-			ai.update_action_target(ai.dodge_priorities, _target[i], i + 1)
+			ai.update_action_target(ai.dodge_priorities, _target[i], (i + 1) / 2)
 	if _count < unit.size:
 		if is_debug: print("敌人体积总数小于自身，躲避优先级降低0.5")
 		ai.AI_priorities[ai.AI_action.dodge] -= 0.5
@@ -242,10 +236,10 @@ func _timid():
 		if is_debug: print("敌人最大体积者小于自身，躲避优先级降低0.5")
 		ai.AI_priorities[ai.AI_action.dodge] -= 0.5
 	
-	for i in ai.dodge_priorities:
+	#for i in ai.dodge_priorities:
 		#如果敌人在警戒范围外，该目标的【躲避】优先级-1
-		if !ai.enemies_in_MonitorArea.has(i):
-			ai.update_action_target(ai.dodge_priorities, i, -1)
+		#if !ai.enemies_in_MonitorArea.has(i):
+			#ai.update_action_target(ai.dodge_priorities, i, -1)
 	
 	if is_debug: print("---特性：胆小，监测结束---")
 	pass
@@ -262,10 +256,13 @@ func _on_teammate_get_damage(damage, attacker, just_size, teammate):
 	if attacker.size > unit.size:
 		if is_debug: print("攻击者体积大于自身，躲避优先级提高0.5")
 		ai.AI_priorities[ai.AI_action.dodge] += 0.5
+		ai.update_action_target(ai.dodge_priorities, attacker, 1)
 	if damage <= just_size / 5 and attacker.size <= unit.size:
-		if is_debug: print("伤害小于自身体积20%且攻击者体积小于自身，守护优先级提高1")
+		if is_debug: print("伤害小于自身体积20%且攻击者体积小于自身，守护优先级提高1，攻击优先级提高1")
 		ai.AI_priorities[ai.AI_action.guard] += 1
 		ai.update_action_target(ai.guard_priorities, teammate, 1)
+		ai.AI_priorities[ai.AI_action.attack] += 1
+		ai.update_action_target(ai.attack_priorities, attacker, 1)
 	if is_debug: print("---AI：Vagrant，队友受到伤害，判定结束---")
 	pass
 
@@ -275,15 +272,17 @@ func _on_get_damage(damage, attacker, just_size):
 	can_monitor_damage = false
 	
 	if is_debug: print("---AI：Vagrant，受到伤害，判定开始---")
-	if damage > just_size / 5:
+	if damage > just_size * 0.2:
 		if is_debug: print("伤害大于自身体积20%，躲避优先级提高0.5")
 		ai.AI_priorities[ai.AI_action.dodge] += 0.5
+		ai.update_action_target(ai.dodge_priorities, attacker, 1)
 	if attacker.size > unit.size:
 		if is_debug: print("攻击者体积大于自身，躲避优先级提高0.5")
 		ai.AI_priorities[ai.AI_action.dodge] += 0.5
-	if damage <= just_size / 5 and attacker.size <= unit.size:
-		if is_debug: print("伤害小于自身体积20%且攻击者体积小于自身，攻击优先级提高1")
-		ai.AI_priorities[ai.AI_action.attack] += 1
-		ai.update_action_target(ai.attack_priorities, attacker, 1)
+		ai.update_action_target(ai.dodge_priorities, attacker, 1)
+	if damage <= just_size * 0.2 and attacker.size <= unit.size:
+		if is_debug: print("伤害小于自身体积20%且攻击者体积小于自身，攻击优先级提高0.5")
+		ai.AI_priorities[ai.AI_action.attack] += 0.5
+		ai.update_action_target(ai.attack_priorities, attacker, 0.5)
 	if is_debug: print("---AI：Vagrant，受到伤害，判定结束---")
 	pass

@@ -12,10 +12,11 @@ func _ready():
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
-	print("--------------")
+	"""print("--------------")
 	if Input.is_action_just_pressed("key_a"):
 		print("pressed a")
 		test.queue_free()
 	print(test)
 	print(is_instance_valid(test))
-	print("--------------")
+	print("--------------")"""
+	$Camera2D.position = $RigidBody2D.position

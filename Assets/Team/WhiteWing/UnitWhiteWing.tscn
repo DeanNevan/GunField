@@ -18,6 +18,7 @@ script = ExtResource( 1 )
 texture = ExtResource( 2 )
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+z_index = 2
 shape = SubResource( 1 )
 
 [node name="AI" type="Node" parent="."]
