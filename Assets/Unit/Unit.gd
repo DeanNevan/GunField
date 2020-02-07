@@ -41,6 +41,11 @@ onready var tween1 = Tween.new()
 onready var tween2 = Tween.new()
 onready var tween3 = Tween.new()
 
+onready var ai = $AI
+var AI_state = ai.AI_action.wander
+onready var WanderTimer = Timer.new()
+var wander_target_vector = Vector2()
+
 func _draw():
 	#for i in $AI.little_balls_in_MonitorArea:
 		#draw_circle(i.global_position - global_position, 2, Color.black)
@@ -68,6 +73,11 @@ func _ready():
 	
 	$Sprite.modulate = get_parent().team_color
 	
+	add_child(WanderTimer)
+	WanderTimer.one_shot = true
+	WanderTimer.connect("timeout", self, "_on_WanderTimer_timeout")
+	WanderTimer.start(rand_range(1, 4))
+	
 	update_collision_bit()
 	update_scale(true)
 	update_scale(true)
@@ -90,20 +100,68 @@ func _process(delta):
 		if Input.is_action_just_pressed("right_mouse_button"):
 			is_selected = true
 			main.selected_unit = self
-			print("!!!!!!!!")
 	else:
 		is_selected = false
-	max_stamina = size
+	
 	#mass = size / 100
 	if size <= 0:
 		die()
 	
 	if is_player_unit:
 		_player_control(delta)
+	else:
+		match ai.AI_state:
+			ai.AI_action.wander:
+				_AI_action_wander()
+			ai.AI_action.collect:
+				_AI_action_collect()
+			ai.AI_action.guard:
+				_AI_action_guard()
+			ai.AI_action.attack:
+				_AI_action_attack()
+			ai.AI_action.dodge:
+				_AI_action_dodge()
+
+func _AI_action_wander():
+	linear_velocity = speed * wander_target_vector.normalized()
+	pass
+		
+
+func _AI_action_collect():
+	if ai.collect_priorities_array.size() > 0:
+		var _list := {}
+		var _array := []
+		for i in ai.collect_priorities_array:
+			_list[i] = i.size / (i.global_position - global_position).length()
+		_array = ai.list_sort_to_array(_list, 3)
+		#找出性价比（小球体积与距离之比）最高的小球
+		linear_velocity = speed * (_array[0]).normalized()
+	elif ai.little_balls_in_MonitorArea.size() > 0:
+		linear_velocity = ai.little_balls_in_MonitorArea[0]
+	pass
+
+func _AI_action_guard():
+	pass
+
+func _AI_action_attack():
+	pass
+
+func _AI_action_dodge():
+	pass
+
+#func _AI_state_machine(target_state):
+#	if target_state == ai.AI_state:
+#		return false
+	
 
 func _init_AI():
 	yield(get_tree(), "idle_frame")
 	$AI.init_start_AI()
+
+func _on_WanderTimer_timeout():
+	if ai.AI_state == ai.AI_action.wander:
+		WanderTimer.start(rand_range(1, 4))
+		wander_target_vector = Vector2().rotated(rand_range(-PI, PI))
 
 func _player_control(delta):
 	velocity = Vector2()
@@ -243,6 +301,7 @@ func update_collision_bit():
 func update_scale(is_init = false):
 	size_para = sqrt(clamp(size / 100, 0.5, 100))
 	update_speed()
+	max_stamina = size
 	#yield(tween1, "tree_entered")
 	if weapon != null:
 		weapon.scale = Vector2(size_para, size_para)

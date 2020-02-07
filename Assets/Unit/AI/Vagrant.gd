@@ -75,8 +75,8 @@ func update_property():
 	unit.init_speed *= 1.25
 	#单位的基础转化率提高20%
 	unit.basic_conversion_rate *= 1.2
-	#警戒范围提高30%
-	get_parent().monitor_sensitivity *= 1.3
+	#警戒范围提高25%
+	get_parent().monitor_sensitivity *= 1.25
 	#调整行为最大优先级
 	get_parent().AI_action_wander_max_priority += 2
 	get_parent().AI_action_collect_max_priority += 2

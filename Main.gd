@@ -8,7 +8,11 @@ var on_mouse_unit
 
 var team_count = 2
 
-var color_array = [Color.black, Color.blue, Color.red, Color.green, Color.white, Color.yellow, Color.gray, Color.purple, Color.orange, Color.pink, Color.blueviolet]
+var color_array = [Color.black, Color.blue, Color.red, 
+				   Color.green, Color.white, Color.yellow, 
+				   Color.gray, Color.purple, Color.orange, Color.pink, 
+				   Color.blueviolet, Color.aliceblue, Color.darkviolet
+				  ]
 
 var little_ball = preload("res://Assets/LittleBall/LittleBall.tscn")
 
@@ -49,7 +53,8 @@ func _physics_process(delta):
 						+ "【收集】优先级：" + str(selected_unit.get_node("AI").AI_priorities[selected_unit.get_node("AI").AI_action.collect]) + "\n"
 						+ "【守护】优先级：" + str(selected_unit.get_node("AI").AI_priorities[selected_unit.get_node("AI").AI_action.guard]) + "\n"
 						+ "【攻击】优先级：" + str(selected_unit.get_node("AI").AI_priorities[selected_unit.get_node("AI").AI_action.attack]) + "\n"
-						+ "【躲避】优先级：" + str(selected_unit.get_node("AI").AI_priorities[selected_unit.get_node("AI").AI_action.dodge]) + "\n") 
+						+ "【躲避】优先级：" + str(selected_unit.get_node("AI").AI_priorities[selected_unit.get_node("AI").AI_action.dodge]) + "\n"
+						) 
 	
 	if player_unit != null:
 		$Camera2D.position = player_unit.position

@@ -41,10 +41,15 @@ var guard_priorities_array := []
 var dodge_priorities := {}
 var dodge_priorities_array := []
 
+var action_with_array := {AI_action.collect : collect_priorities,
+						 AI_action.guard : guard_priorities_array,
+						 AI_action.attack : attack_priorities_array,
+						 AI_action.dodge : dodge_priorities_array}
+
 onready var MonitorArea = Area2D.new()
 onready var MonitorAreaShape = CollisionShape2D.new()
 var monitor_sensitivity := 1
-onready var ActionUpdaterTimer = Timer.new()
+onready var action_updaterTimer = Timer.new()
 var action_updater_time = 2
 
 var team
@@ -62,10 +67,10 @@ func _ready():
 	
 	team = get_parent().team
 	
-	add_child(ActionUpdaterTimer)
-	ActionUpdaterTimer.connect("timeout", self, "_on_ActionUpdaterTimer_timeout")
-	ActionUpdaterTimer.one_shot = true
-	ActionUpdaterTimer.start(2)
+	add_child(action_updaterTimer)
+	action_updaterTimer.connect("timeout", self, "_on_action_updaterTimer_timeout")
+	action_updaterTimer.one_shot = true
+	action_updaterTimer.start(2)
 	
 	_clamp_AI_priority()
 	AI_priorities_array = list_sort_to_array(AI_priorities)
@@ -89,11 +94,19 @@ func update_MonitorAreaShape():
 	if get_parent().weapon != null:
 		MonitorAreaShape.shape.radius = 15 * get_parent().get_node("Sprite").scale.x + monitor_sensitivity * get_parent().weapon.fire_range
 
-func ActionUpdater():
+func action_updater():
 	#teammates_in_MonitorArea.erase(self)
 	_clamp_AI_priority()
 	AI_priorities_array = list_sort_to_array(AI_priorities)
-	AI_state = AI_priorities[0]
+	
+	var _temp = false
+	for i in AI_priorities_array:
+		if action_with_array[i].size() > 0:
+			AI_state = i
+			_temp = true
+			return
+	if !_temp:
+		AI_state = AI_action.wander
 	match AI_state:
 		AI_action.collect:
 			update_collect_priorities()
@@ -171,11 +184,11 @@ func update_action_target(action_list, target, para):
 	else:
 		action_list[target] += para
 
-func _on_ActionUpdaterTimer_timeout():
+func _on_action_updaterTimer_timeout():
 	update_MonitorAreaShape()
 	
-	ActionUpdater()
-	ActionUpdaterTimer.start(action_updater_time)
+	action_updater()
+	action_updaterTimer.start(action_updater_time)
 
 func _on_MonitorArea_body_entered(body):
 	if body.has_method("get_damage"):
