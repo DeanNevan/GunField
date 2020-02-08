@@ -70,9 +70,11 @@ func update_property():
 	ceil(weapon.fire_range)
 	#单位的初始体积降低20%
 	unit.init_size *= 0.8
+	unit.size *= 0.8
 	
-	#单位的初始速度提高25%
-	unit.init_speed *= 1.25
+	#单位的初始速度提高15%
+	unit.init_speed *= 1.15
+	unit.update_scale()
 	#单位的基础转化率提高20%
 	unit.basic_conversion_rate *= 1.2
 	#警戒范围提高25%
@@ -212,9 +214,10 @@ func _timid():
 	for i in ai.enemies_in_MonitorArea:
 		_count += i.size
 		if i.size > _max:
-			if i.size > unit.size:
-				_target.append(i)
 			_max = i.size
+		if i.size > unit.size:
+			_target.append(i)
+	#print(_target.size())
 	if is_debug: print("警戒范围内敌人体积总数：" + str(_count) + "\n" + "大于自身体积的敌人个数：" + str(_target.size()))
 	if _count >= unit.size:
 		if is_debug: print("敌人体积总数大于自身，躲避优先级提高1，漫游优先级降低1")

@@ -42,9 +42,11 @@ onready var tween2 = Tween.new()
 onready var tween3 = Tween.new()
 
 onready var ai = $AI
-var AI_state = ai.AI_action.wander
+#var AI_state = ai.AI_action.wander
 onready var WanderTimer = Timer.new()
-var wander_target_vector = Vector2()
+var wander_target_vector = Vector2(1, 0).rotated(rand_range(-PI, PI))
+
+var collect_target
 
 func _draw():
 	#for i in $AI.little_balls_in_MonitorArea:
@@ -62,6 +64,8 @@ func _ready():
 	size = init_size
 	speed = init_speed
 	
+	main = get_node("/root/Main")
+	
 	emoji_state = 0
 	$Sprite.add_child(Emoji)
 	add_child(EmojiTimer)
@@ -76,7 +80,7 @@ func _ready():
 	add_child(WanderTimer)
 	WanderTimer.one_shot = true
 	WanderTimer.connect("timeout", self, "_on_WanderTimer_timeout")
-	WanderTimer.start(rand_range(1, 4))
+	WanderTimer.start(rand_range(1, 2))
 	
 	update_collision_bit()
 	update_scale(true)
@@ -123,21 +127,31 @@ func _process(delta):
 				_AI_action_dodge()
 
 func _AI_action_wander():
-	linear_velocity = speed * wander_target_vector.normalized()
+	linear_velocity = (speed / 2) * wander_target_vector
 	pass
 		
 
 func _AI_action_collect():
-	if ai.collect_priorities_array.size() > 0:
+	if collect_target != null and is_instance_valid(collect_target):
+		linear_velocity = speed * (collect_target.global_position - global_position).normalized()
+	elif ai.collect_priorities_array.size() > 0:
 		var _list := {}
 		var _array := []
 		for i in ai.collect_priorities_array:
+			if !is_instance_valid(i):
+				continue
 			_list[i] = i.size / (i.global_position - global_position).length()
-		_array = ai.list_sort_to_array(_list, 3)
+		_array = ai.list_sort_to_array(_list, 2)
 		#找出性价比（小球体积与距离之比）最高的小球
-		linear_velocity = speed * (_array[0]).normalized()
+		if _array.size() > 0:
+			collect_target = _array[0]
+			linear_velocity = Vector2()
+		else:
+			linear_velocity = Vector2()
 	elif ai.little_balls_in_MonitorArea.size() > 0:
-		linear_velocity = ai.little_balls_in_MonitorArea[0]
+		linear_velocity = speed * (ai.little_balls_in_MonitorArea[0].global_position - global_position).normalized()
+	else:
+		linear_velocity = Vector2()
 	pass
 
 func _AI_action_guard():
@@ -160,8 +174,8 @@ func _init_AI():
 
 func _on_WanderTimer_timeout():
 	if ai.AI_state == ai.AI_action.wander:
-		WanderTimer.start(rand_range(1, 4))
-		wander_target_vector = Vector2().rotated(rand_range(-PI, PI))
+		WanderTimer.start(rand_range(1, 2))
+		wander_target_vector = Vector2(1, 0).rotated(rand_range(-PI, PI))
 
 func _player_control(delta):
 	velocity = Vector2()
@@ -258,7 +272,7 @@ func get_damage(damage, force = Vector2(), attacker = null):
 	size_para = sqrt(clamp(size / 100, 1, 100))
 	update_emoji(2, 0.5)
 	linear_velocity += force * 2
-	release_a_little_ball(damage, global_position - force.normalized() * 16 * size_para)
+	release_a_little_ball(damage, global_position - force.normalized() * 19 * size_para)
 	emit_signal("get_damage", damage, attacker, just_size)
 
 func release_a_little_ball(little_ball_size, pos):

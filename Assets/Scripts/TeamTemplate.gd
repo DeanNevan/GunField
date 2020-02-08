@@ -48,6 +48,8 @@ func game_init(init_position = Vector2(), is_player_team1 = false, init_unit_cou
 		var new_unit = unit.instance()
 		new_unit.team = team_number
 		new_unit.global_position = init_position + Vector2(rand_range(-100, 100), rand_range(-100, 100))
+		new_unit.size = new_unit.init_size
+		#new_unit.speed = new_unit.init_speed
 		add_child(new_unit)
 		#var weapon = load("res://Assets/Guns/MP5/MP5.tscn").instance()
 		#var weapon = load("res://Assets/Guns/Arc-001/Arc-001.tscn").instance()

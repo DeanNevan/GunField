@@ -41,10 +41,11 @@ var guard_priorities_array := []
 var dodge_priorities := {}
 var dodge_priorities_array := []
 
-var action_with_array := {AI_action.collect : collect_priorities,
-						 AI_action.guard : guard_priorities_array,
-						 AI_action.attack : attack_priorities_array,
-						 AI_action.dodge : dodge_priorities_array}
+var action_with_array := {AI_action.wander : [],
+						  AI_action.collect : collect_priorities_array,
+						  AI_action.guard : guard_priorities_array,
+						  AI_action.attack : attack_priorities_array,
+						  AI_action.dodge : dodge_priorities_array}
 
 onready var MonitorArea = Area2D.new()
 onready var MonitorAreaShape = CollisionShape2D.new()
@@ -79,6 +80,14 @@ func _ready():
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _physics_process(delta):
+	if get_parent().is_player_unit:
+		#print(AI_state)
+		#print(attack_priorities_array)
+		pass
+	update_collect_priorities()
+	update_attack_priorities()
+	update_guard_priorities()
+	update_dodge_priorities()
 	MonitorArea.global_position = get_parent().global_position
 	pass
 
@@ -97,17 +106,25 @@ func update_MonitorAreaShape():
 func action_updater():
 	#teammates_in_MonitorArea.erase(self)
 	_clamp_AI_priority()
-	AI_priorities_array = list_sort_to_array(AI_priorities)
+	AI_priorities_array = list_sort_to_array(AI_priorities, 5)
 	
+	action_with_array = {AI_action.wander : [],
+						 AI_action.collect : collect_priorities_array,
+						 AI_action.guard : guard_priorities_array,
+						 AI_action.attack : attack_priorities_array,
+						 AI_action.dodge : dodge_priorities_array
+						}
+
 	var _temp = false
 	for i in AI_priorities_array:
 		if action_with_array[i].size() > 0:
 			AI_state = i
 			_temp = true
-			return
+			break
 	if !_temp:
 		AI_state = AI_action.wander
-	match AI_state:
+		pass
+	"""match AI_state:
 		AI_action.collect:
 			update_collect_priorities()
 		AI_action.attack:
@@ -115,7 +132,7 @@ func action_updater():
 		AI_action.guard:
 			update_guard_priorities()
 		AI_action.dodge:
-			update_dodge_priorities()
+			update_dodge_priorities()"""
 	pass
 
 func _clamp_AI_priority():
@@ -141,8 +158,10 @@ func list_sort_to_array(list : Dictionary, list_size := 0):
 func update_collect_priorities(list_size = 3):
 	for i in collect_priorities:
 		if !little_balls_in_MonitorArea.has(i):
-			collect_priorities[i] -= 1
-		if collect_priorities.get(i) <= 0 or !is_instance_valid(i):
+			collect_priorities[i] -= 0.5
+		if !is_instance_valid(i):
+			collect_priorities.erase(i)
+		elif collect_priorities.get(i) <= 0:
 			collect_priorities.erase(i)
 		else:
 			collect_priorities[i] = clamp(collect_priorities[i], 0, 10)
@@ -151,9 +170,12 @@ func update_collect_priorities(list_size = 3):
 func update_attack_priorities(list_size = 3):
 	for i in attack_priorities:
 		if !enemies_in_MonitorArea.has(i):
-			attack_priorities[i] -= 1
-		if attack_priorities.get(i) <= 0 or !is_instance_valid(i):
+			attack_priorities[i] -= 0.5
+		if !is_instance_valid(i):
 			attack_priorities.erase(i)
+		elif attack_priorities.get(i) <= 0:
+			attack_priorities.erase(i)
+			
 		else:
 			attack_priorities[i] = clamp(attack_priorities[i], 0, 10)
 	attack_priorities_array = list_sort_to_array(attack_priorities, clamp(list_size, 0, attack_priorities.size()))
@@ -161,8 +183,10 @@ func update_attack_priorities(list_size = 3):
 func update_guard_priorities(list_size = 3):
 	for i in guard_priorities:
 		if !teammates_in_MonitorArea.has(i):
-			guard_priorities[i] -= 1
-		if guard_priorities.get(i) <= 0 or !is_instance_valid(i):
+			guard_priorities[i] -= 0.5
+		if !is_instance_valid(i):
+			guard_priorities.erase(i)
+		elif guard_priorities.get(i) <= 0:
 			guard_priorities.erase(i)
 		else:
 			guard_priorities[i] = clamp(guard_priorities[i], 0, 10)
@@ -171,16 +195,22 @@ func update_guard_priorities(list_size = 3):
 func update_dodge_priorities(list_size = 3):
 	for i in dodge_priorities:
 		if !enemies_in_MonitorArea.has(i):
-			dodge_priorities[i] -= 1
-		if dodge_priorities.get(i) <= 0 or !is_instance_valid(i):
+			dodge_priorities[i] -= 0.5
+		if !is_instance_valid(i):
+			dodge_priorities.erase(i)
+		elif dodge_priorities.get(i) <= 0:
 			dodge_priorities.erase(i)
 		else:
 			dodge_priorities[i] = clamp(dodge_priorities[i], 0, 10)
 	dodge_priorities_array = list_sort_to_array(dodge_priorities, clamp(list_size, 0, dodge_priorities.size()))
+	#if get_parent().is_selected:
+	#print(dodge_priorities_array)
 
 func update_action_target(action_list, target, para):
+	#print(str(action_list) + str(target) + str(para))
 	if !action_list.has(target):
 		action_list[target] = para
+		#print("222222")
 	else:
 		action_list[target] += para
 
@@ -201,7 +231,10 @@ func _on_MonitorArea_body_entered(body):
 
 func _on_MonitorArea_area_entered(area):
 	if area.has_method("_on_LittleBall_body_entered"):
-		little_balls_in_MonitorArea.append(area)
+		if little_balls_in_MonitorArea.size() > 50:
+			little_balls_in_MonitorArea[rand_range(0, little_balls_in_MonitorArea.size() - 1)] = area
+		else:
+			little_balls_in_MonitorArea.append(area)
 	if area.has_method("fly"):
 		if area.team != team:
 			enemy_bullets_in_MonitorArea.append(area)

@@ -173,7 +173,10 @@ func _brave():
 			_target.invert()
 			for i in _target.size():
 				if _target[i].size > unit.size * 4:
-					ai.update_action_target(ai.dodge_priorities, _target, (i + 1) / 2)
+					ai.update_action_target(ai.dodge_priorities, _target[i], (i + 1) / 2)
+		else:
+			for i in _target.size():
+				ai.update_action_target(ai.attack_priorities, _target[i], (i + 1) / 2)
 	else:
 		ai.AI_priorities[ai.AI_action.attack] -= 0.5
 

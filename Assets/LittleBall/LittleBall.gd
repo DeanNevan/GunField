@@ -5,6 +5,10 @@ var size_para = sqrt(clamp(size / 10, 1, 100))
 
 var unit
 onready var tween1 = Tween.new()
+
+var can_be_picked_up = false
+var on_self_bodies = []
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	add_to_group("LB")
@@ -17,11 +21,15 @@ func _ready():
 	$Sprite.visible = true
 	tween1.interpolate_property(self, "scale", Vector2(), Vector2(size_para, size_para), 0.5, Tween.TRANS_LINEAR, Tween.EASE_IN)
 	tween1.start()
+	
+	yield(get_tree().create_timer(0.8), "timeout")
+	can_be_picked_up = true
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _physics_process(delta):
-	#_update_scale()
-	#global_rotation += 0.5
+	if can_be_picked_up and on_self_bodies.size() > 0:
+		on_self_bodies[0].eat_a_little_ball(size)
+		queue_free()
 	pass
 
 """func _update_scale():
@@ -35,6 +43,10 @@ func _on_LittleBall_body_entered(body):
 	if body.has_method("eat_a_little_ball"):
 		if body.size <= size:
 			return false
-		body.eat_a_little_ball(size)
-		queue_free()
+		on_self_bodies.append(body)
 		pass
+
+
+func _on_LittleBall_body_exited(body):
+	on_self_bodies.erase(body)
+	pass # Replace with function body.

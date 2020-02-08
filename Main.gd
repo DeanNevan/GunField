@@ -16,7 +16,7 @@ var color_array = [Color.black, Color.blue, Color.red,
 
 var little_ball = preload("res://Assets/LittleBall/LittleBall.tscn")
 
-var map_size = Vector2(3000, 3000)
+var map_size = Vector2(2000, 2000)
 
 onready var DebugLabel = $CanvasLayer/Debug
 onready var TweenCameraZoom = Tween.new()
@@ -45,7 +45,7 @@ func _ready():
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _physics_process(delta):
-	if selected_unit != null:
+	if selected_unit != null and is_instance_valid(selected_unit) and selected_unit.has_method("get_damage"):
 		DebugLabel.text = ("该单位信息" + "\n"
 						+ "体积：" + str(selected_unit.size) + "\n"
 						+ "速度：" + str(selected_unit.speed) + "\n"
@@ -54,6 +54,10 @@ func _physics_process(delta):
 						+ "【守护】优先级：" + str(selected_unit.get_node("AI").AI_priorities[selected_unit.get_node("AI").AI_action.guard]) + "\n"
 						+ "【攻击】优先级：" + str(selected_unit.get_node("AI").AI_priorities[selected_unit.get_node("AI").AI_action.attack]) + "\n"
 						+ "【躲避】优先级：" + str(selected_unit.get_node("AI").AI_priorities[selected_unit.get_node("AI").AI_action.dodge]) + "\n"
+						+ "当前AI行为：" + str(selected_unit.get_node("AI").AI_state) + "\n"
+						+ "【躲避】目标列表：" + str(selected_unit.get_node("AI").dodge_priorities) + "\n"
+						+ "【躲避】目标数组：" + str(selected_unit.get_node("AI").dodge_priorities_array) + "\n"
+						+ "警戒范围内小球个数：" + str(selected_unit.get_node("AI").little_balls_in_MonitorArea.size()) + "\n"
 						) 
 	
 	if player_unit != null:
@@ -64,12 +68,13 @@ func _on_add_little_ball_timer_timeout():
 	add_little_ball(100)
 
 func _on_LB_monitor_timer_timeout():
-	if get_tree().get_nodes_in_group("LB").size() >= 3000:
+	if get_tree().get_nodes_in_group("LB").size() >= 600:
+		#print("stop!!!!")
 		add_LittleBall_timer.paused = true
 	else:
 		add_LittleBall_timer.paused = false
 
-func add_little_ball(count = 100):
+func add_little_ball(count = 30):
 	for i in count:
 		var new_little_ball = little_ball.instance()
 		new_little_ball.modulate = color_array[randi() % color_array.size()]

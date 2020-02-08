@@ -6,7 +6,8 @@ extends "res://Assets/Scripts/TeamTemplate.gd"
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	team_weapon = preload("res://Assets/Guns/Arc-001/Arc-001.tscn")
+	#team_weapon = preload("res://Assets/Guns/Arc-001/Arc-001.tscn")
+	team_weapon = preload("res://Assets/Guns/MP5/MP5.tscn")
 	team_color = Color.red
 	unit = preload("res://Assets/Team/RedKill/UnitRedKill.tscn")
 	team_number = 1
